@@ -1,101 +1,68 @@
 package brickGame;
 
+
 public class GameEngine {
 
     private OnAction onAction;
-    private int fps = 60;
-    private long frameTime = 1000000000 / fps;
+    private int fps = 15;
     private Thread updateThread;
     private Thread physicsThread;
-    private Thread timeThread;
-    private volatile boolean isStopped = true;
-    private long time = 0;
+    public volatile boolean isStopped = true;
 
     public void setOnAction(OnAction onAction) {
         this.onAction = onAction;
     }
 
+    /**
+     * @param fps set fps and we convert it to millisecond
+     */
     public void setFps(int fps) {
-        this.fps = fps;
-        this.frameTime = 1000000000 / fps;
+        this.fps = (int) 1000 / fps;
     }
 
-    private void initialize() {
+    private synchronized void Update() {
+        updateThread = new Thread(() -> {
+            while (!updateThread.isInterrupted()) {
+                try {
+                    onAction.onUpdate();
+                    Thread.sleep(fps);
+                } catch (InterruptedException e) {
+                    System.out.println("onUpdate thread interrupted.");
+                    Thread.currentThread().interrupt();
+                }
+            }
+        });
+        updateThread.start();
+    }
+
+    private void Initialize() {
         onAction.onInit();
     }
 
-    private void updateLoop() {
-        long lastTime = System.nanoTime();
-        long unprocessedTime = 0;
-
-        while (!Thread.interrupted()) {
-            long now = System.nanoTime();
-            long passedTime = now - lastTime;
-            lastTime = now;
-            unprocessedTime += passedTime;
-
-            while (unprocessedTime >= frameTime) {
-                onAction.onUpdate();
-                unprocessedTime -= frameTime;
-            }
-
-            Thread.yield();
-        }
-    }
-
-    private void physicsLoop() {
-        long lastTime = System.nanoTime();
-        long unprocessedTime = 0;
-
-        while (!Thread.interrupted()) {
-            long now = System.nanoTime();
-            long passedTime = now - lastTime;
-            lastTime = now;
-            unprocessedTime += passedTime;
-
-            while (unprocessedTime >= frameTime) {
-                onAction.onPhysicsUpdate();
-                unprocessedTime -= frameTime;
-            }
-
-            Thread.yield();
-        }
-    }
-
-    private void timeStart() {
-        timeThread = new Thread(() -> {
-            long lastTime = System.nanoTime();
-            long unprocessedTime = 0;
-
-            while (!Thread.interrupted()) {
-                long now = System.nanoTime();
-                long passedTime = now - lastTime;
-                lastTime = now;
-                unprocessedTime += passedTime;
-
-                while (unprocessedTime >= frameTime) {
-                    time++;
-                    onAction.onTime(time);
-                    unprocessedTime -= frameTime;
+    private synchronized void PhysicsCalculation() {
+        physicsThread = new Thread(() -> {
+            while (!physicsThread.isInterrupted()) {
+                try {
+                    onAction.onPhysicsUpdate();
+                    Thread.sleep(fps);
+                } catch (InterruptedException e) {
+                    System.out.println("onPhysics thread interrupted.");
+                    Thread.currentThread().interrupt();
                 }
-
-                Thread.yield();
             }
         });
-        timeThread.start();
+
+        physicsThread.start();
+
     }
 
     public void start() {
-        if (isStopped) {
-            time = 0;
-            initialize();
-            updateThread = new Thread(this::updateLoop);
-            physicsThread = new Thread(this::physicsLoop);
-            updateThread.start();
-            physicsThread.start();
-            timeStart();
-            isStopped = false;
-        }
+        time = 0;
+        Initialize();
+        Update();
+        PhysicsCalculation();
+        TimeStart();
+        isStopped = false;
     }
 
     public void stop() {
@@ -107,6 +74,27 @@ public class GameEngine {
         }
     }
 
+    private long time = 0;
+
+    private Thread timeThread;
+
+    private synchronized void  TimeStart() {
+        timeThread = new Thread(() -> {
+            try {
+                while (true) {
+                    time++;
+                    onAction.onTime(time);
+                    Thread.sleep(1);
+                }
+            } catch (InterruptedException e) {
+                System.out.println("TimeStart thread interrupted.");
+                Thread.currentThread().interrupt();
+            }
+        });
+        timeThread.start();
+    }
+
+
     public interface OnAction {
         void onUpdate();
 
@@ -116,4 +104,5 @@ public class GameEngine {
 
         void onTime(long time);
     }
+
 }

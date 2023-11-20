@@ -81,7 +81,12 @@ public class Score {
             label.setScaleX(2);
             label.setScaleY(2);
 
-            main.root.getChildren().addAll(label);
+            Button restart = new Button("Start New Game");
+            restart.setTranslateX(220);
+            restart.setTranslateY(300);
+            restart.setOnAction(event -> main.restartGame());
+
+            main.root.getChildren().addAll(label, restart);
         });
     }
 }
