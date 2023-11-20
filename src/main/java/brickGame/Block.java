@@ -80,25 +80,29 @@ public class Block implements Serializable {
     }
 
 
-    public int checkHitToBlock(double xBall, double yBall) {
-
+    // Added ballRadius parameter to take ballRadius into consideration so that the collisions to blocks are more accurate and the ball doesn't phase through the blocks.
+    public int checkHitToBlock(double xBall, double yBall, double ballRadius) {
         if (isDestroyed) {
             return NO_HIT;
         }
 
-        if (xBall >= x && xBall <= x + width && yBall == y + height) {
+        // Check collision with the bottom of the block
+        if (xBall >= x && xBall <= x + width && yBall - ballRadius <= y + height && yBall + ballRadius > y + height) {
             return HIT_BOTTOM;
         }
 
-        if (xBall >= x && xBall <= x + width && yBall == y) {
+        // Check collision with the top of the block
+        if (xBall >= x && xBall <= x + width && yBall + ballRadius >= y && yBall - ballRadius < y) {
             return HIT_TOP;
         }
 
-        if (yBall >= y && yBall <= y + height && xBall == x + width) {
+        // Check collision with the right side of the block
+        if (yBall >= y && yBall <= y + height && xBall - ballRadius <= x + width && xBall + ballRadius > x + width) {
             return HIT_RIGHT;
         }
 
-        if (yBall >= y && yBall <= y + height && xBall == x) {
+        // Check collision with the left side of the block
+        if (yBall >= y && yBall <= y + height && xBall + ballRadius >= x && xBall - ballRadius < x) {
             return HIT_LEFT;
         }
 

@@ -53,7 +53,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
     private double v = 1.000;
 
-    private int  heart    = 3;
+    private int  heart    = -1;
     private int  score    = 0;
     private long time     = 0;
     private long hitTime  = 0;
@@ -240,31 +240,28 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     float oldXBreak;
 
     private void move(final int direction) {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                int sleepTime = 4;
-                for (int i = 0; i < 30; i++) {
-                    if (xBreak == (sceneWidth - breakWidth) && direction == RIGHT) {
-                        return;
-                    }
-                    if (xBreak == 0 && direction == LEFT) {
-                        return;
-                    }
-                    if (direction == RIGHT) {
-                        xBreak++;
-                    } else {
-                        xBreak--;
-                    }
-                    centerBreakX = xBreak + halfBreakWidth;
-                    try {
-                        Thread.sleep(sleepTime);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    if (i >= 20) {
-                        sleepTime = i;
-                    }
+        new Thread(() -> {
+            int sleepTime = 4;
+            for (int i = 0; i < 30; i++) {
+                if (xBreak == (sceneWidth - breakWidth) && direction == RIGHT) {
+                    return;
+                }
+                if (xBreak == 0 && direction == LEFT) {
+                    return;
+                }
+                if (direction == RIGHT) {
+                    xBreak++;
+                } else {
+                    xBreak--;
+                }
+                centerBreakX = xBreak + halfBreakWidth;
+                try {
+                    Thread.sleep(sleepTime);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                if (i >= 20) {
+                    sleepTime = i;
                 }
             }
         }).start();
@@ -652,7 +649,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
         if (yBall >= Block.getPaddingTop() && yBall <= (Block.getHeight() * (level + 1)) + Block.getPaddingTop()) {
             for (final Block block : blocks) {
-                int hitCode = block.checkHitToBlock(xBall, yBall);
+                int hitCode = block.checkHitToBlock(xBall, yBall, ballRadius);
                 if (hitCode != Block.NO_HIT) {
                     score += 1;
 
