@@ -26,7 +26,7 @@ public class Block implements Serializable {
     private int width = 100;
     private int height = 30;
     private int paddingTop = height * 2;
-    private int paddingH = 50;
+    private int paddingH = 70;
     public Rectangle rect;
 
 
@@ -35,6 +35,10 @@ public class Block implements Serializable {
     public static int HIT_BOTTOM = 1;
     public static int HIT_LEFT = 2;
     public static int HIT_TOP = 3;
+    public static int HIT_BOTTOM_RIGHT = 4;
+    public static int HIT_BOTTOM_LEFT = 5;
+    public static int HIT_TOP_RIGHT = 6;
+    public static int HIT_TOP_LEFT = 7;
 
     public static int BLOCK_NORMAL = 99;
     public static int BLOCK_CHOCO = 100;
@@ -88,11 +92,29 @@ public class Block implements Serializable {
 
         // Check collision with the bottom of the block
         if (xBall >= x && xBall <= x + width && yBall - ballRadius <= y + height && yBall + ballRadius > y + height) {
+            // Check collision with the right side of the block, effectively checking bottom-right corner collision
+            if (yBall >= y && yBall <= y + height && xBall - ballRadius <= x + width && xBall + ballRadius > x + width){
+                return HIT_BOTTOM_RIGHT;
+            }
+            // Check collision with the left side of the block, effectively checking bottom-left corner collision
+            else if (yBall >= y && yBall <= y + height && xBall + ballRadius >= x && xBall - ballRadius < x){
+                return HIT_BOTTOM_LEFT;
+            }
+            //Otherwise it is just the bottom side that was hit
             return HIT_BOTTOM;
         }
 
         // Check collision with the top of the block
         if (xBall >= x && xBall <= x + width && yBall + ballRadius >= y && yBall - ballRadius < y) {
+            // Check collision with the right side of the block, effectively checking top-right corner collision
+            if (yBall >= y && yBall <= y + height && xBall - ballRadius <= x + width && xBall + ballRadius > x + width){
+                return HIT_TOP_RIGHT;
+            }
+            // Check collision with the left side of the block, effectively checking top-left corner collision
+            else if (yBall >= y && yBall <= y + height && xBall + ballRadius >= x && xBall - ballRadius < x){
+                return HIT_TOP_LEFT;
+            }
+            //Otherwise it is just the top side that was hit
             return HIT_TOP;
         }
 
@@ -105,6 +127,7 @@ public class Block implements Serializable {
         if (yBall >= y && yBall <= y + height && xBall + ballRadius >= x && xBall - ballRadius < x) {
             return HIT_LEFT;
         }
+
 
         return NO_HIT;
     }

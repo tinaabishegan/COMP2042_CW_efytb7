@@ -58,7 +58,7 @@ public class Score {
 
     public void showGameOver(final Main main) {
         Platform.runLater(() -> {
-            Label label = new Label("Game Over :(");
+            Label label = new Label("Game Over. Try again!");
             label.setTranslateX(200);
             label.setTranslateY(250);
             label.setScaleX(2);
