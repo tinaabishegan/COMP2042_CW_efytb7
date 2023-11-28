@@ -47,9 +47,6 @@ public class GameEngine {
         updateThread.start();
     }
 
-    private void Initialize() {
-        onAction.onInit();
-    }
 
     private synchronized void PhysicsCalculation() {
         physicsThread = new Thread(() -> {
@@ -70,7 +67,6 @@ public class GameEngine {
 
     public void start() {
         time = 0;
-        Initialize();
         Update();
         PhysicsCalculation();
         TimeStart();
@@ -78,11 +74,13 @@ public class GameEngine {
     }
     public void start(long t) {
         time = t;
-        Initialize();
         Update();
         PhysicsCalculation();
         TimeStart();
         isStopped = false;
+    }
+    private void Initialize() {
+        onAction.onInit();
     }
 
     public void stop() {

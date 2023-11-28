@@ -19,10 +19,7 @@ public class LoadSave {
     public boolean          collideToBottomBlock;
     public boolean          collideToLeftBlock;
     public boolean          collideToTopBlock;
-    public boolean          collideToBottomRightBlock;
-    public boolean          collideToBottomLeftBlock;
-    public boolean          collideToTopRightBlock;
-    public boolean          collideToTopLeftBlock;
+    public int              difficulty;
     public int              level;
     public int              score;
     public int              heart;
@@ -39,18 +36,13 @@ public class LoadSave {
 
 
     public void read() {
-
-
         try {
             ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(new File(Main.savePath)));
-
-
+            difficulty = inputStream.readInt();
             level = inputStream.readInt();
             score = inputStream.readInt();
             heart = inputStream.readInt();
             destroyedBlockCount = 0;
-
-
             xBall = inputStream.readDouble();
             yBall = inputStream.readDouble();
             xBreak = inputStream.readDouble();
@@ -59,8 +51,6 @@ public class LoadSave {
             time = inputStream.readLong();
             goldTime = inputStream.readLong();
             vX = inputStream.readDouble();
-
-
             isExistHeartBlock = inputStream.readBoolean();
             isGoldStatus = inputStream.readBoolean();
             goDownBall = inputStream.readBoolean();
@@ -73,12 +63,6 @@ public class LoadSave {
             collideToBottomBlock = inputStream.readBoolean();
             collideToLeftBlock = inputStream.readBoolean();
             collideToTopBlock = inputStream.readBoolean();
-            collideToBottomRightBlock = inputStream.readBoolean();
-            collideToBottomLeftBlock = inputStream.readBoolean();
-            collideToTopRightBlock = inputStream.readBoolean();
-            collideToTopLeftBlock = inputStream.readBoolean();
-
-
 
             try {
                 blocks = (ArrayList<BlockSerializable>) inputStream.readObject();

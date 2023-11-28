@@ -1,6 +1,9 @@
 .root {
-    -fx-background-color: #1d1d1d;
+    -fx-background-image: url("./bg.jpg");
+    -fx-background-size: cover;
 }
+
+
 
 .goldRoot {
     -fx-background-color: #4b4a08;

@@ -34,7 +34,7 @@ public class Score {
 
     public void showMessage(String message, final Main main) {
         final Label label = new Label(message);
-        label.setTranslateX(220);
+        label.setTranslateX(440);
         label.setTranslateY(340);
 
         Platform.runLater(() -> main.root.getChildren().add(label));
@@ -56,16 +56,16 @@ public class Score {
         }).start();
     }
 
-    public void showGameOver(final Main main) {
+    public void showGameOver(final Main main, int level, int score) {
         Platform.runLater(() -> {
-            Label label = new Label("Game Over. Try again!");
-            label.setTranslateX(200);
+            Label label = new Label("Game Over. Try again!\n You reached Level "+ level + "\namassing " + score + " points!!");
+            label.setTranslateX(400);
             label.setTranslateY(250);
             label.setScaleX(2);
             label.setScaleY(2);
 
             Button restart = new Button("Restart");
-            restart.setTranslateX(220);
+            restart.setTranslateX(440);
             restart.setTranslateY(300);
             restart.setOnAction(event -> main.restartGame());
 
@@ -76,13 +76,13 @@ public class Score {
     public void showWin(final Main main) {
         Platform.runLater(() -> {
             Label label = new Label("You Win :)");
-            label.setTranslateX(200);
+            label.setTranslateX(400);
             label.setTranslateY(250);
             label.setScaleX(2);
             label.setScaleY(2);
 
             Button restart = new Button("Start New Game");
-            restart.setTranslateX(220);
+            restart.setTranslateX(440);
             restart.setTranslateY(300);
             restart.setOnAction(event -> main.restartGame());
 
