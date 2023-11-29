@@ -31,6 +31,8 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     private double xBreak = 205.0f;
     private double centerBreakX;
     private double yBreak = 900.0f;
+    private double xVerstappen = 0;
+    private double yVerstappen = 0;
     private int breakWidth     = 130;
     private int breakHeight    = 30;
     private int halfBreakWidth = breakWidth / 2;
@@ -41,9 +43,14 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     private Circle ball;
     private double xBall;
     private double yBall;
+    private double volume = 0;
+    private boolean isMaxTime = false;
     private boolean isGoldStatus = false;
+    private boolean isPause = false;
     private boolean isExistHeartBlock = false;
+    private boolean isExistVerstappenBlock = false;
     private Rectangle rect;
+    private Rectangle verstappen;
     private int ballRadius = 10;
     private int destroyedBlockCount = 0;
     private double v = 1.000;
@@ -68,20 +75,13 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     public static String savePathDir = "./save/";
     private ArrayList<Block> blocks = new ArrayList<Block>();
     private ArrayList<Bonus> chocos = new ArrayList<Bonus>();
-    private Color[]          colors = new Color[]{
-            Color.MAGENTA,
-            Color.RED,
-            Color.GOLD,
-            Color.CORAL,
-            Color.AQUA,
-            Color.VIOLET,
-            Color.GREENYELLOW,
-            Color.ORANGE,
-            Color.PINK,
-            Color.SLATEGREY,
-            Color.YELLOW,
-            Color.TOMATO,
-            Color.TAN,
+    private Color[] colors = new Color[]{
+            Color.rgb(173, 216, 230), // Pastel Blue
+            Color.rgb(144, 238, 144), // Pastel Green
+            Color.rgb(255, 255, 153), // Pastel Yellow
+            Color.rgb(230, 230, 250), // Pastel Lavender
+            Color.rgb(255, 218, 185), // Pastel Peach
+            Color.rgb(200, 162, 200)  // Pastel Lilac
     };
     public  Pane             root;
     private Label            scoreLabel;
@@ -101,7 +101,9 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+        Image backgroundImage = new Image("/bg"+ difficulty +".jpg");
         root = new Pane();
+
         this.primaryStage = primaryStage;
         if(level<0){
             load = new Button("Load Game");
@@ -132,14 +134,14 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                 difficulty=4;
             });
             load.setOnAction(event -> {
-                sound.playBGM("running.mp3",0.01);
+                sound.playBGM("running.mp3");
                 initBall();
                 initBreak();
                 loadGame();
             });
             newGame.setOnAction(event -> {
                 level++;
-                sound.playBGM("running.mp3",0.01);
+                sound.playBGM("running.mp3");
                 sceneWidth=540+difficulty*Block.getWidth();
                 try {
                         start(primaryStage);
@@ -149,6 +151,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             });
         }
         else{
+            root.setStyle("-fx-background-image: url('"+backgroundImage.getUrl()+"');-fx-background-size: cover;");
             if (loadFromSave == false) {
                 level++;
                 if (level >1){
@@ -157,6 +160,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                 if (level == 18) {
                     sound.stopBGM();
                     new Score().showWin(this);
+                    setScene();
                     return;
                 }
                 initBall();
@@ -182,9 +186,18 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             engine = new GameEngine();
             engine.setOnAction(this);
             engine.setFps(120);
-            engine.start();
+            if(!loadFromSave) {
+                engine.start();
+            }
+            else{
+                engine.start(time);
+            }
         }
 
+        setScene();
+    }
+
+    private void setScene(){
         Scene scene = new Scene(root, sceneWidth, sceneHeight);
         scene.getStylesheets().add("style.css");
         scene.setOnKeyPressed(this);
@@ -193,6 +206,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         primaryStage.setScene(scene);
         primaryStage.show();
     }
+
     private void initBall() {
         Random random = new Random();
         xBall = random.nextInt(sceneWidth) + 1;
@@ -231,7 +245,14 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                     }
                 } else if (r % 10 == 3) {
                     type = Block.BLOCK_STAR;
-                } else {
+                } else if (r % 10 == 4) {
+                    if (!isExistVerstappenBlock) {
+                        type = Block.BLOCK_VERSTAPPEN;
+                        isExistVerstappenBlock = true;
+                    } else {
+                        type = Block.BLOCK_NORMAL;
+                    }
+                }else {
                     type = Block.BLOCK_NORMAL;
                 }
                 blocks.add(new Block(j, i, colors[r % (colors.length)], type));
@@ -257,6 +278,9 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                 break;
             case S:
                 saveGame();
+                break;
+            case P:
+                pauseGame();
                 break;
         }
     }
@@ -520,12 +544,17 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         }
     }
     private void resetStage() {
+        if(isMaxTime){
+            isMaxTime=false;
+            removeMax();
+        }
         vX = 1.000;
         xBreak=205;
         resetCollideFlags();
         goDownBall = true;
         isGoldStatus = false;
         isExistHeartBlock = false;
+        isExistVerstappenBlock=false;
         hitTime = 0;
         time = 0;
         goldTime = 0;
@@ -585,15 +614,13 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             });
         }
 
-
-
-
         synchronized (lock) {
-            if (yBall >= Block.getPaddingTop() && yBall <= (Block.getHeight() * (level + 1)) + Block.getPaddingTop()) {
+            if (yBall >= Block.getPaddingTop() && yBall <= (Block.getHeight() * (level + 1)) + Block.getPaddingTop() || isMaxTime) {
                 for (final Block block : blocks) {
                     int hitCode = block.checkHitToBlock(xBall, yBall, ballRadius);
-                    if (hitCode != Block.NO_HIT) {
-                        sound.playSFX("doorhit.mp3",0.01);
+                    int maxCode = block.checkHitToBlock(xVerstappen+breakWidth, yVerstappen+15,ballRadius);
+                    if (hitCode != Block.NO_HIT || maxCode != Block.NO_HIT) {
+                        sound.playSFX("doorhit.mp3");
                         score += 1;
 
                         new Score().show(block.x, block.y, 1, this);
@@ -622,6 +649,10 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
                         if (block.type == Block.BLOCK_HEART) {
                             heart++;
+                        }
+
+                        if (block.type == Block.BLOCK_VERSTAPPEN) {
+                            spawnMax(block.row, difficulty);
                         }
 
                         if (hitCode == Block.HIT_RIGHT) {
@@ -661,13 +692,25 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     }
     @Override
     public void onPhysicsUpdate() {
+        sound.setVolume(volume);
         checkDestroyedCount();
         setPhysicsToBall();
-
 
         if (time - goldTime > 5000) {
             ball.setFill(new ImagePattern(new Image("ball2.png")));
             isGoldStatus = false;
+        }
+
+        if(isMaxTime){
+            if(xVerstappen>=sceneWidth){
+                isMaxTime=false;
+                removeMax();
+            }
+            xVerstappen+=5;
+            Platform.runLater(() -> {
+                verstappen.setX(xVerstappen);
+                verstappen.setY(yVerstappen);
+            });
         }
 
         for (Bonus choco : chocos) {
@@ -690,6 +733,42 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     @Override
     public void onTime(long time) {
         this.time = time;
+    }
+
+    private void pauseGame(){
+        isPause = !isPause;
+        if (isPause) {
+            new Score().showMessage("Za Warudo", this);
+            engine.stop();
+            sound.pauseBGM();
+        } else {
+            new Score().showMessage("Resume", this);
+            engine.start();
+            sound.resumeBGM();
+        }
+    }
+
+    private void spawnMax(int row, int difficulty) {
+        sound.pauseBGM();
+        sound.playVerstappen("verstappen.mp3");
+        isMaxTime=true;
+        System.out.println("max");
+        xVerstappen = 0 - breakWidth;
+        yVerstappen = Block.getPaddingTop() + row * Block.getHeight();
+        verstappen = new Rectangle();
+        verstappen.setWidth(breakWidth);
+        verstappen.setHeight(Block.getHeight());
+        ImagePattern pattern = new ImagePattern(new Image("maxverstappen.png"));
+        verstappen.setFill(pattern);
+        Platform.runLater(() -> root.getChildren().add(verstappen));
+    }
+
+    private void removeMax() {
+        sound.stopVerstappen();
+        sound.resumeBGM();
+        xVerstappen=0;
+        yVerstappen=0;
+        Platform.runLater(() -> root.getChildren().remove(verstappen));
     }
 }
 
