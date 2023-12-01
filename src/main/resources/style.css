@@ -1,14 +1,57 @@
-.root {
+@font-face {
+    src: url('Unibody_8.ttf'); /* Adjust the path based on your file structure */
+}
+
+#pauseMenu {
+    -fx-background-color: rgba(0,0,0,0);
+    -fx-background-image: url("./pausemenu.png");
+    -fx-background-size: cover;
+}
+
+
+#pauseMenu .button {
+    -fx-background-color: rgb(255, 176, 23); /* Light grey background in RGBA */
+    -fx-font-size: 14px; /* Replace 14px with the desired font size */
+    -fx-padding: 5px 10px; /* Padding around the text */
+    -fx-border-color: black;
+    -fx-border-radius: 2px; /* Sharp corners */
+    -fx-border-width: 2px; /* No border */
+    -fx-text-fill: black; /* Bright white font color */
+}
+
+#pauseMenu .button .text{
+    -fx-font-family: 'Unibody 8';
+}
+
+#pauseMenu .label{
+    -fx-font-family: 'Unibody 8';
+    -fx-text-fill: black;
+}
+
+#rootMenu {
     -fx-background-image: url("./bg.jpg");
     -fx-background-size: cover;
 }
 
+.button {
+    -fx-background-color: rgba(224, 224, 224, 0.3); /* Light grey background in RGBA */
+    -fx-font-size: 14px; /* Replace 14px with the desired font size */
+    -fx-padding: 5px 10px; /* Padding around the text */
+    -fx-background-radius: 0; /* Sharp corners */
+    -fx-border-width: 0; /* No border */
+    -fx-text-fill: white; /* Bright white font color */
+}
+
+.button .text {
+    -fx-font-family: 'Unibody 8';
+}
 
 .goldRoot {
     -fx-background-color: #4b4a08;
 }
 
 .label {
+    -fx-font-family: 'Unibody 8';
     -fx-text-fill: #FFF;
     -fx-label-padding: 8px;
     -fx-font-size: 15px;

@@ -3,6 +3,8 @@ package brickGame;
 import javafx.application.Platform;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.geometry.Pos;
+
 //import sun.plugin2.message.Message;
 
 public class Score {
@@ -24,7 +26,7 @@ public class Score {
                         label.setScaleY(setI);
                         label.setOpacity((20 - setI) / 20.0);
                     });
-                    Thread.sleep(15);
+                    Thread.sleep(20);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -56,37 +58,33 @@ public class Score {
         }).start();
     }
 
-    public void showGameOver(final Main main, int level, int score) {
+    public void showGameEnd(final Main main, int level, int score) {
         Platform.runLater(() -> {
-            Label label = new Label("Game Over. Try again!\n You reached Level "+ level + "\namassing " + score + " points!!");
-            label.setTranslateX(400);
-            label.setTranslateY(250);
+            String message = "default";
+            if (level<18) {
+                message = "Game Over. Try again!\n You reached Level " + level + "\namassing " + score + " points!!";
+            }
+            else {
+                message = "You Win!!!";
+            }
+            Label label = new Label(message);
+            label.setAlignment(Pos.CENTER);
+            label.setTranslateX((main.sceneWidth - label.getWidth()) / 2);
+            label.setTranslateY((main.sceneHeight - label.getHeight()) / 2);
             label.setScaleX(2);
             label.setScaleY(2);
 
             Button restart = new Button("Restart");
-            restart.setTranslateX(440);
-            restart.setTranslateY(300);
+            restart.setTranslateX(main.sceneWidth/2+100);
+            restart.setTranslateY(main.sceneHeight/2+100);
             restart.setOnAction(event -> main.restartGame());
 
-            main.root.getChildren().addAll(label, restart);
-        });
-    }
+            Button quit = new Button("Quit Game");
+            quit.setTranslateX(main.sceneWidth/2+100);
+            quit.setTranslateY(main.sceneHeight/2+300);
+            quit.setOnAction(event -> main.quit());
 
-    public void showWin(final Main main) {
-        Platform.runLater(() -> {
-            Label label = new Label("You Win :)");
-            label.setTranslateX(400);
-            label.setTranslateY(250);
-            label.setScaleX(2);
-            label.setScaleY(2);
-
-            Button restart = new Button("Start New Game");
-            restart.setTranslateX(440);
-            restart.setTranslateY(300);
-            restart.setOnAction(event -> main.restartGame());
-
-            main.root.getChildren().addAll(label, restart);
+            main.root.getChildren().addAll(label, restart, quit);
         });
     }
 }
