@@ -8,7 +8,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.Pane;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Circle;
@@ -19,20 +19,18 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.util.Duration;
 import javafx.stage.Popup;
-import javafx.scene.layout.VBox;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Slider;
 import javafx.scene.image.ImageView;
 import javafx.stage.Modality;
+import javafx.scene.control.TextField;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Objects;
-import java.util.Random;
+import java.util.*;
+
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
-import javafx.scene.layout.HBox;
 
 public class Main extends Application implements EventHandler<KeyEvent>, GameEngine.OnAction {
     private final Object lock = new Object();
@@ -69,7 +67,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     private long time     = 0;
     private long hitTime  = 0;
     private long goldTime = 0;
-    private boolean goDownBall                   = true;
+    private boolean goDownBall                   = false;
     private boolean goRightBall                  = true;
     private boolean collideToBreak               = false;
     private boolean collideToBreakAndMoveToRight = true;
@@ -201,11 +199,9 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             if (level >1){
                 new Score().showMessage("Level Up :)", this);
             }
-            if (level == 18) {
-                isInLevel=true;
-                sound.stopBGM();
+            if (level == (18*(difficulty+1)+1)) {
+                gameEnd();
                 new Score().showGameEnd(this, level, score);
-                setScene();
                 return;
             }
             initBall();
@@ -223,7 +219,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         levelLabel = new Label("Level: " + level);
         levelLabel.setTranslateY(20);
         heartLabel = new Label("Heart : " + heart);
-        heartLabel.setTranslateX(sceneWidth - 90);
+        heartLabel.setTranslateX(sceneWidth - 120);
         root.getChildren().addAll(rect, ball, scoreLabel, heartLabel, levelLabel);
         for (Block block : blocks) {
             root.getChildren().add(block.rect);
@@ -242,13 +238,10 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     }
 
     public void gameEnd(){
+        sceneWidth=960;
+        isInLevel=false;
         sound.stopBGM();
         root = new Pane();
-        VBox pauseRoot = new VBox(5);
-
-
-
-
         setScene();
     }
 
@@ -265,7 +258,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     private void initBall() {
         Random random = new Random();
         xBall = random.nextInt(sceneWidth) + 1;
-        yBall = random.nextInt(sceneHeight - 150 - ((level + 1) * Block.getHeight())) + ((level + 1) * Block.getHeight()) + 15;
+        yBall = random.nextInt(sceneHeight - 150 - ((level/(difficulty+1) + 1) * Block.getHeight())) + ((level/(difficulty+1) + 1) * Block.getHeight()) + 15;
         ball = new Circle();
         ball.setRadius(ballRadius);
         ball.setFill(new ImagePattern(new Image("ball2.png")));
@@ -283,7 +276,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     }
     private void initBoard() {
         for (int i = 0; i < 4+difficulty; i++) {
-            for (int j = 0; j < level + 1; j++) {
+            for (int j = 0; j < level/(difficulty+1) + 1; j++) {
                 int r = new Random().nextInt(500);
                 if (r % 5 == 0) {
                     continue;
@@ -406,7 +399,6 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
         if (yBall + ballRadius >= sceneHeight) {
             Random random = new Random();
-            //yBall= random.nextInt(100) + 100;
             resetCollideFlags();
             goDownBall = false;
             if (!isGoldStatus) {
@@ -415,7 +407,6 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                 new Score().show(sceneWidth / 2, sceneHeight / 2, -1, this);
                 if (heart == 0) {
                     Platform.runLater(() -> {
-                        isInLevel=false;
                         gameEnd();
                         new Score().showGameEnd(this, level, score);
                     });
@@ -439,10 +430,10 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                     //vX = 0;
                     vX = Math.abs(relation);
                 } else if (Math.abs(relation) > 0.3 && Math.abs(relation) <= 0.7) {
-                    vX = (Math.abs(relation) * 1.5) + (level / 3.500);
+                    vX = (Math.abs(relation) * 1.5) + (level/(difficulty+1) / 3.500);
                     //System.out.println("vX " + vX);
                 } else {
-                    vX = (Math.abs(relation) * 2) + (level / 3.500);
+                    vX = (Math.abs(relation) * 2) + (level/(difficulty+1) / 3.500);
                     //System.out.println("vX " + vX);
                 }
 
@@ -604,9 +595,10 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             removeMax();
         }
         vX = 1.000;
+        vY = 1.000;
         xBreak=205;
         resetCollideFlags();
-        goDownBall = true;
+        goDownBall = false;
         isGoldStatus = false;
         isExistHeartBlock = false;
         isExistVerstappenBlock=false;
@@ -625,17 +617,19 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         }
     }
     private void nextLevel() {
-        Platform.runLater(() -> {
-            try {
-                resetStage();
-                engine.stop();
-                if(heart!=0) {
-                    startLevel(primaryStage);
+        synchronized (lock){
+            Platform.runLater(() -> {
+                try {
+                    resetStage();
+                    engine.stop();
+                    if(heart!=0) {
+                        startLevel(primaryStage);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
+            });
+        }
     }
     public void restartGame() {
         difficulty=0;
@@ -694,10 +688,9 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
                         if (block.type == Block.BLOCK_STAR) {
                             goldTime = time;
-                            ball.setFill(new ImagePattern(new Image("goldball.png")));
+                            Platform.runLater(() -> ball.setFill(new ImagePattern(new Image("goldball.png"))));
                             System.out.println("gold ball");
                             new Score().showMessage("GOLDEN", this);
-                            //root.getStyleClass().add("goldRoot");
                             isGoldStatus = true;
                         }
 

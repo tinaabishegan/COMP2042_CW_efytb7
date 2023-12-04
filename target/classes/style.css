@@ -34,7 +34,7 @@
 }
 
 .button {
-    -fx-background-color: rgba(224, 224, 224, 0.3); /* Light grey background in RGBA */
+    -fx-background-color: rgba(224, 224, 224, 0.6); /* Light grey background in RGBA */
     -fx-font-size: 14px; /* Replace 14px with the desired font size */
     -fx-padding: 5px 10px; /* Padding around the text */
     -fx-background-radius: 0; /* Sharp corners */
@@ -56,3 +56,17 @@
     -fx-label-padding: 8px;
     -fx-font-size: 15px;
 }
+
+/* styles.css */
+.custom-text-field {
+    -fx-background-color: rgba(255, 255, 255, 0.1); /* Transparent background */
+    -fx-border-color: rgba(255, 255, 255, 0.8); /* White border with 50% opacity */
+    -fx-border-width: 1px; /* Border width */
+    -fx-padding: 5px; /* Padding inside the TextField */
+    -fx-prompt-text-fill: #888; /* Prompt text color */
+    -fx-background-radius: 0; /* Sharp corners */
+    -fx-border-radius: 0; /* Sharp corners for the border */
+    -fx-font-family: 'Unibody 8'; /* Set font family */
+    -fx-text-fill: white;
+}
+
