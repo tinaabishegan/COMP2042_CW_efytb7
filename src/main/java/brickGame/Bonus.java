@@ -5,10 +5,9 @@ import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Rectangle;
 
 import java.io.Serializable;
-import java.util.Random;
 
 public class Bonus implements Serializable {
-    public Rectangle choco;
+    public Rectangle bonus;
 
     public double x;
     public double y;
@@ -23,15 +22,15 @@ public class Bonus implements Serializable {
     }
 
     private void draw() {
-        choco = new Rectangle();
-        choco.setWidth(30);
-        choco.setHeight(30);
-        choco.setX(x);
-        choco.setY(y);
+        bonus = new Rectangle();
+        bonus.setWidth(30);
+        bonus.setHeight(30);
+        bonus.setX(x);
+        bonus.setY(y);
 
         String url = "bonus1.png";
 
-        choco.setFill(new ImagePattern(new Image(url)));
+        bonus.setFill(new ImagePattern(new Image(url)));
     }
 
 

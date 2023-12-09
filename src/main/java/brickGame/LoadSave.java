@@ -32,6 +32,7 @@ public class LoadSave {
     public long             time;
     public long             goldTime;
     public double           vX;
+    public double           vY;
     public ArrayList<BlockSerializable> blocks = new ArrayList<BlockSerializable>();
 
 
@@ -51,6 +52,7 @@ public class LoadSave {
             time = inputStream.readLong();
             goldTime = inputStream.readLong();
             vX = inputStream.readDouble();
+            vY = inputStream.readDouble();
             isExistHeartBlock = inputStream.readBoolean();
             isGoldStatus = inputStream.readBoolean();
             goDownBall = inputStream.readBoolean();
@@ -73,6 +75,5 @@ public class LoadSave {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
 }

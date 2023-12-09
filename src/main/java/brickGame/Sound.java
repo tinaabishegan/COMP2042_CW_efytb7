@@ -5,18 +5,31 @@ import javafx.scene.media.MediaPlayer;
 import java.net.URL;
 
 public class Sound {
+    private static Sound instance;
     private MediaPlayer bgmPlayer;
-    private MediaPlayer sfxPlayer;
     private MediaPlayer verstappenPlayer;
+    private MediaPlayer gameOverPlayer;
+    private double volume = 0.5;
 
-    private double volume = 0.1;
+    private Sound() {
+    }
+
+    public static Sound getInstance() {
+        if (instance == null) {
+            instance = new Sound();
+        }
+        return instance;
+    }
 
     public void setVolume(double volume){
         this.volume=volume;
     }
 
+    public double getVolume(){
+        return volume;
+    }
+
     public void playVerstappen(String backgroundMusicPath) {
-        // If there's already music playing, stop it
         if (verstappenPlayer != null) {
             verstappenPlayer.stop();
         }
@@ -42,18 +55,15 @@ public class Sound {
             verstappenPlayer.pause();
         }
     }
-
     public void resumeVerstappen() {
         if (verstappenPlayer != null && verstappenPlayer.getStatus() == MediaPlayer.Status.PAUSED) {
             verstappenPlayer.setVolume(volume);
             verstappenPlayer.play();
         }
     }
-
     public void stopVerstappen(){
         verstappenPlayer.stop();
     }
-
     public void playBGM(String backgroundMusicPath) {
         // If there's already music playing, stop it
         if (bgmPlayer != null) {
@@ -81,14 +91,17 @@ public class Sound {
             bgmPlayer.pause();
         }
     }
-
     public void resumeBGM() {
         if (bgmPlayer != null && bgmPlayer.getStatus() == MediaPlayer.Status.PAUSED) {
             bgmPlayer.setVolume(volume);
             bgmPlayer.play();
         }
     }
-
+    public void stopBGM() {
+        if (bgmPlayer != null) {
+            bgmPlayer.stop();
+        }
+    }
 
     public void playSFX(String soundEffectPath) {
         try {
@@ -98,7 +111,7 @@ public class Sound {
             }
 
             Media soundEffect = new Media(resource.toExternalForm());
-            sfxPlayer = new MediaPlayer(soundEffect);
+            MediaPlayer sfxPlayer = new MediaPlayer(soundEffect);
             sfxPlayer.setVolume(volume);
             sfxPlayer.play();
         } catch (Exception e) {
@@ -106,9 +119,30 @@ public class Sound {
             e.printStackTrace();
         }
     }
+    public void playGameOver(String gameOverMusicPath) {
+        if (gameOverPlayer != null) {
+            gameOverPlayer.stop();
+        }
 
-    public void stopBGM(){
-        bgmPlayer.stop();
+        try {
+            URL resource = getClass().getResource("/sounds/" + gameOverMusicPath);
+            if (resource == null) {
+                throw new IllegalArgumentException("Cannot find file: " + gameOverMusicPath);
+            }
+
+            Media backgroundMusic = new Media(resource.toExternalForm());
+            gameOverPlayer = new MediaPlayer(backgroundMusic);
+            gameOverPlayer.setCycleCount(MediaPlayer.INDEFINITE);
+            gameOverPlayer.setVolume(volume);
+            gameOverPlayer.play();
+        } catch (Exception e) {
+            System.err.println("Error playing game over music: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    public void stopGameOver(){
+        gameOverPlayer.stop();
     }
 
 }

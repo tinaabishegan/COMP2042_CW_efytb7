@@ -1,35 +1,25 @@
 package brickGame;
 
-
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Rectangle;
-
 import java.io.Serializable;
 
 public class Block implements Serializable {
     private static Block block = new Block(-1, -1, Color.TRANSPARENT, 99);
-
     public int row;
     public int column;
-
-
     public boolean isDestroyed = false;
-
     private Color color;
     public int type;
-
     public int x;
     public int y;
-
     private int width = 100;
     private int height = 30;
     private int paddingTop = height * 2;
     private int paddingH = 70;
     public Rectangle rect;
-
-
     public static int NO_HIT = -1;
     public static int HIT_RIGHT = 0;
     public static int HIT_BOTTOM = 1;
@@ -39,34 +29,30 @@ public class Block implements Serializable {
     public static int HIT_BOTTOM_LEFT = 5;
     public static int HIT_TOP_RIGHT = 6;
     public static int HIT_TOP_LEFT = 7;
-
     public static int BLOCK_NORMAL = 99;
-    public static int BLOCK_CHOCO = 100;
+    public static int BLOCK_BONUS = 100;
     public static int BLOCK_STAR = 101;
     public static int BLOCK_HEART = 102;
     public static int BLOCK_VERSTAPPEN = 103;
-
 
     public Block(int row, int column, Color color, int type) {
         this.row = row;
         this.column = column;
         this.color = color;
         this.type = type;
-
         draw();
     }
 
     private void draw() {
         x = (column * width) + paddingH;
         y = (row * height) + paddingTop;
-
         rect = new Rectangle();
         rect.setWidth(width);
         rect.setHeight(height);
         rect.setX(x);
         rect.setY(y);
 
-        if (type == BLOCK_CHOCO) {
+        if (type == BLOCK_BONUS) {
             Image image = new Image("choco.jpg");
             ImagePattern pattern = new ImagePattern(image);
             rect.setFill(pattern);
@@ -85,7 +71,6 @@ public class Block implements Serializable {
         } else {
             rect.setFill(color);
         }
-
     }
 
 

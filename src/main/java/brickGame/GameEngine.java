@@ -2,23 +2,25 @@ package brickGame;
 
 
 public class GameEngine {
-
-    // Interface for actions to be performed in the game
+    private static GameEngine instance;
     private OnAction onAction;
-
-    // Frames per second ( set to 15 )
     private int fps = 15;
-
-    // Thread for game update
     private Thread updateThread;
-
-    // Thread for physics calculations
     private Thread physicsThread;
-
-    // Flag to check if game is stopped
     public volatile boolean isStopped = true;
 
-    // Set the action handler for the game
+    private GameEngine() {
+        // Private constructor to prevent instantiation outside of this class
+    }
+
+    // Singleton instance retrieval method
+    public static synchronized GameEngine getInstance() {
+        if (instance == null) {
+            instance = new GameEngine();
+        }
+        return instance;
+    }
+
     public void setOnAction(OnAction onAction) {
         this.onAction = onAction;
     }
@@ -79,9 +81,6 @@ public class GameEngine {
         TimeStart();
         isStopped = false;
     }
-    private void Initialize() {
-        onAction.onInit();
-    }
 
     public void stop() {
         if (!isStopped) {
@@ -115,8 +114,6 @@ public class GameEngine {
 
     public interface OnAction {
         void onUpdate();
-
-        void onInit();
 
         void onPhysicsUpdate();
 
