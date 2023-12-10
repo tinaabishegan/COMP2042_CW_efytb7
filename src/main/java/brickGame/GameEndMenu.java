@@ -17,21 +17,43 @@ import java.util.Arrays;
 import java.util.Comparator;
 import javafx.scene.layout.GridPane;
 
+/**
+ * Represents the end menu of the game, including displaying game over/win messages,
+ * saving scores, and showing the leaderboard.
+ */
 public class GameEndMenu {
+    // Instance of the Sound class for playing sounds
+
+    /**
+     * Constructs a new instance of the GameEndMenu class.
+     * This constructor is used to create an object of the GameEndMenu class.
+     */
+    public GameEndMenu() {
+    }
+
     Sound sound = Sound.getInstance();
 
+    /**
+     * Represents a saved player with a name and score.
+     */
     class savedPlayer {
         String name;
         int score;
     }
 
+    /**
+     * Displays the game over or win message along with options to submit score, restart, or quit the game.
+     *
+     * @param main  The main game instance.
+     * @param level The level reached.
+     * @param score The player's score.
+     */
     public void showGameEnd(final Main main, int level, int score) {
         Platform.runLater(() -> {
             String message;
-            if (level< main.maxLevel) {
+            if (level < main.maxLevel) {
                 message = "Game Over. Try again!\n You reached Level " + level + "\namassing " + score + " points!!";
-            }
-            else {
+            } else {
                 message = "You Win!!!";
             }
 
@@ -52,7 +74,6 @@ public class GameEndMenu {
                 saveScore(userName.getText(), score);
                 submitButton.setDisable(true);
             });
-
 
             Label label = new Label(message);
             label.setScaleX(1.7);
@@ -77,28 +98,35 @@ public class GameEndMenu {
             quit.setTranslateY(500);
             quit.setOnAction(event -> main.quit());
 
-
             readScore(main, 125, 100);
             main.root.getChildren().addAll(label, userName, submitButton, restart, quit);
             main.root.setStyle("-fx-background-image: url('gameend.jpg');-fx-background-size: cover;");
         });
     }
 
-    private void saveScore(String name, int score){
-        try
-        {
-            String filename= "./save/leaderboard.txt";
-            FileWriter fw = new FileWriter(filename,true); //the true will append the new data
-            fw.write(name + "," + score +"\n");//appends the string to the file
+    /**
+     * Saves the player's score and name to the leaderboard file.
+     *
+     * @param name  The player's name.
+     * @param score The player's score.
+     */
+    private void saveScore(String name, int score) {
+        try {
+            String filename = "./save/leaderboard.txt";
+            FileWriter fw = new FileWriter(filename, true); // the true will append the new data
+            fw.write(name + "," + score + "\n");// appends the string to the file
             fw.close();
-        }
-        catch(IOException ioe)
-        {
+        } catch (IOException ioe) {
             System.err.println("IOException: " + ioe.getMessage());
         }
     }
 
-    public savedPlayer[] getTopPlayer(){
+    /**
+     * Retrieves the top players from the leaderboard file.
+     *
+     * @return An array of saved players, sorted by score in descending order.
+     */
+    public savedPlayer[] getTopPlayer() {
         int lines = 0;
         int i = 0;
         try (BufferedReader reader = new BufferedReader(new FileReader("./save/leaderboard.txt"))) {
@@ -106,7 +134,6 @@ public class GameEndMenu {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        System.out.println(lines);
         savedPlayer[] array = new savedPlayer[lines];
         try {
             File myObj = new File("./save/leaderboard.txt");
@@ -129,7 +156,14 @@ public class GameEndMenu {
         return array;
     }
 
-    public void readScore(final Main main, int xPos, int yPos){
+    /**
+     * Reads and displays the top players and their scores in a grid pane.
+     *
+     * @param main The main game instance.
+     * @param xPos The X-coordinate position of the grid pane.
+     * @param yPos The Y-coordinate position of the grid pane.
+     */
+    public void readScore(final Main main, int xPos, int yPos) {
         Platform.runLater(() -> {
             savedPlayer[] array = getTopPlayer();
 
